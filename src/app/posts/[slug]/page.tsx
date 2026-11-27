@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import CommentForm from "@/components/CommentForm";
+import CommentList from "@/components/CommentList";
 import { formatDate, getAllPosts, getPostBySlug } from "@/lib/posts";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -49,7 +52,28 @@ export default async function PostPage({ params }: Props) {
         ))}
       </div>
 
-      {/* Phase 2: comments section (Postgres-backed) will be rendered here. */}
+      <section
+        aria-labelledby="comments-heading"
+        className="mt-14 border-t border-slate-200 pt-10 dark:border-slate-800"
+      >
+        <h2
+          id="comments-heading"
+          className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
+        >
+          Comments
+        </h2>
+        <CommentForm slug={slug} />
+        {/* Static shell prerenders; comments stream in at request time. */}
+        <Suspense
+          fallback={
+            <p className="mt-6 text-slate-500 dark:text-slate-400">
+              Loading comments...
+            </p>
+          }
+        >
+          <CommentList slug={slug} />
+        </Suspense>
+      </section>
     </article>
   );
 }
